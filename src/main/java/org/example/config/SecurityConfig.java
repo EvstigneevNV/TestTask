@@ -18,16 +18,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/auth/telegram").permitAll()
+                        .requestMatchers("/", "/auth/telegram").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new TelegramAuthFilter(), UsernamePasswordAuthenticationFilter.class)
                 .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/")
+                        .loginPage("/")
                         .permitAll()
                 );
 

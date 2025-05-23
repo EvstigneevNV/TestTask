@@ -36,11 +36,6 @@ public class AuthController {
         return "index";
     }
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
-
     @PostMapping("/auth/telegram")
     public String authenticate(@RequestBody TelegramUser user,
                                           HttpSession session,

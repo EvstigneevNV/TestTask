@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Telegram Auth</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    </head>
+    <body class="bg-gray-100 min-h-screen flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+            <h1 class="text-2xl font-bold mb-6 text-center">Login with Telegram</h1>
+            <button onclick="loginWithTelegram()"
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition">
+                Sign in with Telegram
+            </button>
+            <div th:if="${param.error}" class="mt-4 text-red-500 text-center">
+                Authentication failed. Please try again.
+            </div>
+        </div>
+        <script>
+            function loginWithTelegram() {
+                const webApp = window.Telegram.WebApp;
+
+                if (!webApp.initDataUnsafe || !webApp.initDataUnsafe.user) {
+                    alert('Telegram WebApp not initialized properly');
+                    return;
+                }
+
+                const userData = webApp.initDataUnsafe.user;
+                userData.hash = webApp.initData;
+                userData.authDate = webApp.initDataUnsafe.auth_date;
+
+                fetch('/auth/telegram', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = '/';
+                    } else {
+                        window.location.href = '/login?error';
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>

@@ -20,42 +20,42 @@
         </div>
         <script>
             document.getElementById('authButton').addEventListener('click', function() {
-                const webApp = window.Telegram.WebApp;
+                document.getElementById('authButton').addEventListener('click', async function() {
+                    try {
+                        const tg = window.Telegram.WebApp;
+                        console.log('Telegram WebApp data:', tg.initDataUnsafe);
 
-                if (!webApp.initDataUnsafe || !webApp.initDataUnsafe.user) {
-                    webApp.showAlert('Please open this page through Telegram app');
-                    return;
-                }
+                        if (!tg.initDataUnsafe?.user) {
+                            alert('Откройте это в Telegram приложении');
+                            return;
+                        }
 
-                const userData = {
-                    id: webApp.initDataUnsafe.user.id,
-                    firstName: webApp.initDataUnsafe.user.first_name,
-                    lastName: webApp.initDataUnsafe.user.last_name,
-                    username: webApp.initDataUnsafe.user.username,
-                    photoUrl: webApp.initDataUnsafe.user.photo_url,
-                    authDate: webApp.initDataUnsafe.auth_date,
-                    hash: webApp.initData
-                };
+                        const response = await fetch('/auth/telegram', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                id: tg.initDataUnsafe.user.id,
+                                firstName: tg.initDataUnsafe.user.first_name,
+                                lastName: tg.initDataUnsafe.user.last_name,
+                                username: tg.initDataUnsafe.user.username,
+                                photoUrl: tg.initDataUnsafe.user.photo_url,
+                                authDate: tg.initDataUnsafe.auth_date,
+                                hash: tg.initData
+                            })
+                        });
 
-                fetch('/auth/telegram', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(userData)
-                })
-                    .then(response => {
                         if (response.ok) {
                             window.location.href = '/profile';
                         } else {
-                            webApp.showAlert('Authentication failed');
+                            alert('Ошибка аутентификации: ' + response.status);
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        webApp.showAlert('Connection error');
-                    });
-            });
+                    } catch (error) {
+                        console.error('Auth error:', error);
+                        alert('Ошибка соединения');
+                    }
+                });
         </script>
     </body>
 </html>

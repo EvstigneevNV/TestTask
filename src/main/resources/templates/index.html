@@ -20,43 +20,78 @@
         </div>
         <script>
             document.getElementById('authButton').addEventListener('click', function() {
-                document.getElementById('authButton').addEventListener('click', async function() {
+                document.getElementById('authButton').addEventListener('click', function() {
                     try {
-                        const tg = window.Telegram.WebApp;
-                        console.log('Telegram WebApp data:', tg.initDataUnsafe);
-
-                        if (!tg.initDataUnsafe?.user) {
-                            alert('Откройте это в Telegram приложении');
+                        // Проверяем инициализацию Telegram WebApp
+                        if (!window.Telegram || !window.Telegram.WebApp) {
+                            console.error('Telegram WebApp SDK not loaded');
                             return;
                         }
 
-                        const response = await fetch('/auth/telegram', {
+                        const tg = window.Telegram.WebApp;
+                        const initData = tg.initData || '';
+                        const initDataUnsafe = tg.initDataUnsafe || {};
+
+                        console.log('Telegram WebApp initialized:', {
+                            initData: initData,
+                            initDataUnsafe: initDataUnsafe
+                        });
+
+                        // Проверяем наличие данных пользователя
+                        if (!initDataUnsafe.user) {
+                            tg.showAlert('Please open this page through Telegram app');
+                            return;
+                        }
+
+                        // Формируем данные для отправки
+                        const userData = {
+                            id: initDataUnsafe.user.id,
+                            firstName: initDataUnsafe.user.first_name || '',
+                            lastName: initDataUnsafe.user.last_name || '',
+                            username: initDataUnsafe.user.username || '',
+                            photoUrl: initDataUnsafe.user.photo_url || '',
+                            authDate: initDataUnsafe.auth_date || '',
+                            hash: initData
+                        };
+
+                        console.log('Sending user data:', userData);
+
+                        // Отправляем данные на сервер
+                        fetch('/auth/telegram', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({
-                                id: tg.initDataUnsafe.user.id,
-                                firstName: tg.initDataUnsafe.user.first_name,
-                                lastName: tg.initDataUnsafe.user.last_name,
-                                username: tg.initDataUnsafe.user.username,
-                                photoUrl: tg.initDataUnsafe.user.photo_url,
-                                authDate: tg.initDataUnsafe.auth_date,
-                                hash: tg.initData
+                            body: JSON.stringify(userData)
+                        })
+                            .then(response => {
+                                console.log('Response status:', response.status);
+                                if (response.ok) {
+                                    return response.text().then(text => {
+                                        console.log('Response text:', text);
+                                        window.location.href = '/profile';
+                                    });
+                                } else {
+                                    return response.text().then(text => {
+                                        console.error('Error response:', text);
+                                        tg.showAlert('Authentication failed: ' + response.status);
+                                    });
+                                }
                             })
-                        });
-
-                        if (response.ok) {
-                            window.location.href = '/profile';
-                        } else {
-                            alert('Ошибка аутентификации: ' + response.status);
-                        }
+                            .catch(error => {
+                                console.error('Fetch error:', error);
+                                tg.showAlert('Connection error: ' + error.message);
+                            });
                     } catch (error) {
-                        console.error('Auth error:', error);
-                        alert('Ошибка соединения');
+                        console.error('Global error:', error);
+                        if (window.Telegram?.WebApp?.showAlert) {
+                            window.Telegram.WebApp.showAlert('Error occurred: ' + error.message);
+                        } else {
+                            alert('Error occurred: ' + error.message);
+                        }
                     }
-                })
-            })
+                });
+            });
         </script>
     </body>
 </html>

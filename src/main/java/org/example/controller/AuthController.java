@@ -49,11 +49,11 @@ public class AuthController {
                 cookie.setSecure(true);
                 response.addCookie(cookie);
                 session.setAttribute("telegramUser", user);
-                return "profile";
+                return "redirect:profile";
             }
-            return "error";
+            return "redirect:error";
         } catch (Exception e) {
-            return "error";
+            return "redirect:error";
         }
     }
 }

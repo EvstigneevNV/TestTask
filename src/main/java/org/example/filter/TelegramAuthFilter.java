@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.example.model.TelegramAuthenticationToken;
 import org.example.model.TelegramUser;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 public class TelegramAuthFilter extends OncePerRequestFilter {
 
     @Value("${telegram.bot.token}")
@@ -42,7 +44,7 @@ public class TelegramAuthFilter extends OncePerRequestFilter {
                             SecurityContextHolder.getContext().setAuthentication(auth);
                         }
                     } catch (Exception e) {
-                        // Логирование ошибки
+                        log.error(e.getMessage(), e);
                     }
                 }
             }

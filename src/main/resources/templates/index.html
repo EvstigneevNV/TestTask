@@ -21,28 +21,43 @@
             function loginWithTelegram() {
                 const webApp = window.Telegram.WebApp;
 
+                // Проверяем инициализацию WebApp
                 if (!webApp.initDataUnsafe || !webApp.initDataUnsafe.user) {
-                    alert('Telegram WebApp not initialized properly');
+                    webApp.showAlert('Please open this page through Telegram');
                     return;
                 }
 
-                const userData = webApp.initDataUnsafe.user;
-                userData.hash = webApp.initData;
-                userData.authDate = webApp.initDataUnsafe.auth_date;
+                // Подготавливаем данные пользователя
+                const userData = {
+                    id: webApp.initDataUnsafe.user.id,
+                    firstName: webApp.initDataUnsafe.user.first_name,
+                    lastName: webApp.initDataUnsafe.user.last_name,
+                    username: webApp.initDataUnsafe.user.username,
+                    photoUrl: webApp.initDataUnsafe.user.photo_url,
+                    authDate: webApp.initDataUnsafe.auth_date,
+                    hash: webApp.initData
+                };
 
+                // Отправляем данные через Fetch API
                 fetch('/auth/telegram', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(userData)
-                }).then(response => {
-                    if (response.ok) {
-                        window.location.href = '/';
-                    } else {
-                        window.location.href = '/login?error';
-                    }
-                });
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            // После успешной аутентификации обновляем страницу
+                            window.location.reload();
+                        } else {
+                            webApp.showAlert('Authentication failed');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        webApp.showAlert('Connection error');
+                    });
             }
         </script>
     </body>

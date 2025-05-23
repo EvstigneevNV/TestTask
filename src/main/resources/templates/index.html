@@ -7,27 +7,26 @@
         <script src="https://telegram.org/js/telegram-web-app.js"></script>
     </head>
     <body class="bg-gray-100 min-h-screen flex items-center justify-center">
-        <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+        <div th:unless="${session.telegramUser}" class="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
             <h1 class="text-2xl font-bold mb-6 text-center">Login with Telegram</h1>
-            <button onclick="loginWithTelegram()"
-                class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition">
-                Sign in with Telegram
+            <button id="authButton" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition">
+                Login with Telegram
             </button>
-            <div th:if="${param.error}" class="mt-4 text-red-500 text-center">
-                Authentication failed. Please try again.
-            </div>
+        </div>
+        <div th:if="${session.telegramUser}">
+            <h2>Welcome!</h2>
+            <p>You are already authenticated</p>
+            <a href="/profile">View Profile</a>
         </div>
         <script>
-            function loginWithTelegram() {
+            document.getElementById('authButton').addEventListener('click', function() {
                 const webApp = window.Telegram.WebApp;
 
-                // Проверяем инициализацию WebApp
                 if (!webApp.initDataUnsafe || !webApp.initDataUnsafe.user) {
-                    webApp.showAlert('Please open this page through Telegram');
+                    webApp.showAlert('Please open this page through Telegram app');
                     return;
                 }
 
-                // Подготавливаем данные пользователя
                 const userData = {
                     id: webApp.initDataUnsafe.user.id,
                     firstName: webApp.initDataUnsafe.user.first_name,
@@ -38,7 +37,6 @@
                     hash: webApp.initData
                 };
 
-                // Отправляем данные через Fetch API
                 fetch('/auth/telegram', {
                     method: 'POST',
                     headers: {
@@ -48,8 +46,7 @@
                 })
                     .then(response => {
                         if (response.ok) {
-                            // После успешной аутентификации обновляем страницу
-                            window.location.reload();
+                            window.location.href = '/profile';
                         } else {
                             webApp.showAlert('Authentication failed');
                         }
@@ -58,7 +55,7 @@
                         console.error('Error:', error);
                         webApp.showAlert('Connection error');
                     });
-            }
+            });
         </script>
     </body>
 </html>

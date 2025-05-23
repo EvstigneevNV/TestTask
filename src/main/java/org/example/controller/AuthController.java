@@ -3,6 +3,7 @@ package org.example.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.example.model.TelegramUser;
 import org.example.model.TelegramUserDetails;
@@ -41,21 +42,25 @@ public class AuthController {
     }
 
     @PostMapping("/auth/telegram")
-    public ResponseEntity<?> authenticate(@RequestBody TelegramUser user,
+    public String authenticate(@RequestBody TelegramUser user,
+                                          HttpSession session,
                                           HttpServletResponse response) {
         log.info("/auth/telegram User: {}", String.valueOf(user));
         try {
-            String userJson = new ObjectMapper().writeValueAsString(user);
-            Cookie cookie = new Cookie("telegram_auth", URLEncoder.encode(userJson, StandardCharsets.UTF_8));
-            cookie.setPath("/");
-            cookie.setMaxAge(86400);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            response.addCookie(cookie);
-
-            return ResponseEntity.ok().build();
+            if (user != null && user.getId() != null) {
+                String userJson = new ObjectMapper().writeValueAsString(user);
+                Cookie cookie = new Cookie("telegram_auth", URLEncoder.encode(userJson, StandardCharsets.UTF_8));
+                cookie.setPath("/");
+                cookie.setMaxAge(86400);
+                cookie.setHttpOnly(true);
+                cookie.setSecure(true);
+                response.addCookie(cookie);
+                session.setAttribute("telegramUser", user);
+                return "profile";
+            }
+            return "error";
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return "error";
         }
     }
 }

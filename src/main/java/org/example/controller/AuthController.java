@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.example.model.TelegramUser;
 import org.example.model.TelegramUserDetails;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,7 +35,9 @@ public class AuthController {
         return "index";
     }
 
-    @PostMapping("/auth/telegram")
+    @PostMapping(value = "/auth/telegram",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.TEXT_HTML_VALUE)
     public String authenticate(@RequestBody TelegramUser user,
                                Model model,
                                HttpServletResponse response) {
@@ -49,7 +52,6 @@ public class AuthController {
                 cookie.setSecure(true);
                 response.addCookie(cookie);
                 model.addAttribute("telegramUser", user);
-                response.sendRedirect("/profile");
                 return "/profile";
             }
             return "/error";

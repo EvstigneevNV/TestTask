@@ -10,6 +10,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("https://telegram.org")
-                .allowedMethods("GET", "POST");
+                .allowedMethods("POST", "OPTIONS")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 }

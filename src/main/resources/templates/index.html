@@ -62,13 +62,11 @@
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify(userData)
-                        })
-                            .then(response => {
+                        }).then(response => {
                                 console.log('Response status:', response.status);
                                 if (response.ok) {
                                     return response.text().then(text => {
                                         console.log('Response text:', text);
-                                        window.location.href = '/profile';
                                     });
                                 } else {
                                     return response.text().then(text => {

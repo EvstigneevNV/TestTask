@@ -18,7 +18,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/auth/telegram").permitAll()
+                        .requestMatchers("/", "/auth/telegram", "/profile", "/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new TelegramAuthFilter(), UsernamePasswordAuthenticationFilter.class)

@@ -7,8 +7,6 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.example.model.TelegramUser;
 import org.example.model.TelegramUserDetails;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,9 +35,9 @@ public class AuthController {
     }
 
     @PostMapping("/auth/telegram")
-    public ResponseEntity<?> authenticate(@RequestBody TelegramUser user,
-                                       HttpSession session,
-                                       HttpServletResponse response) {
+    public String authenticate(@RequestBody TelegramUser user,
+                               Model model,
+                               HttpServletResponse response) {
         log.info("/auth/telegram User: {}", String.valueOf(user));
         try {
             if (user != null && user.getId() != null) {
@@ -50,13 +48,13 @@ public class AuthController {
                 cookie.setHttpOnly(true);
                 cookie.setSecure(true);
                 response.addCookie(cookie);
-                session.setAttribute("telegramUser", user);
-                return ResponseEntity.ok().build();
+                model.addAttribute("telegramUser", user);
+                response.sendRedirect("/profile");
+                return "/profile";
             }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return "/error";
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return "/error";
         }
     }
 }

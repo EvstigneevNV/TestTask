@@ -51,7 +51,7 @@ public class AuthController {
                 cookie.setHttpOnly(true);
                 cookie.setSecure(true);
                 response.addCookie(cookie);
-                model.addAttribute("telegramUser", user);
+                model.addAttribute("user", user);
                 return "/profile";
             }
             return "/error";
